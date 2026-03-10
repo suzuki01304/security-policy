@@ -21,24 +21,53 @@ Security boundaries and best practices for AI agents operating with system acces
 
 ### 1. Credential Handling
 
+**Storage Locations:**
+- **Environment variables**: `~/.openclaw/.env` (must be 600 permissions)
+- **Credential files**: `~/.openclaw/credentials/` (must be 600 permissions)
+- **Service configs**: `~/.config/<service>/` (must be 600 permissions)
+
 **DO ✅**
-- Store credentials in dedicated secure locations
+- Store credentials in dedicated secure locations with 600 permissions
 - Use environment variables or config files with restricted permissions
-- Reference credentials by location, not value
-- Redact credentials in logs and memory files
+- Reference credentials by location and status, never by value
+- Redact credentials in logs, memory files, and chat responses
+- Use descriptive language instead of displaying actual values
+- Check file permissions regularly (use audit script)
 
 **DON'T ❌**
 - Write API keys, tokens, or passwords to MEMORY.md
 - Include credentials in daily logs or summaries
-- Display credentials in chat responses
+- Display credentials in chat responses (use "已配置" or "configured" instead)
 - Commit credentials to Git repositories
+- Set file permissions to 644 or more permissive
+- Show credential values when asked "what's my API key?"
 
-**Example:**
+**Correct Response Pattern:**
+When asked about credentials, respond with:
 ```markdown
 ## API Configuration
-- Notion API: Configured in ~/.config/notion/api_key
-- GitHub Token: Stored in ~/.openclaw/credentials/
-- Status: ✅ All credentials secured
+- Service: Notion
+- Location: ~/.config/notion/api_key
+- Status: ✅ Active
+- Permissions: 600 (secure)
+- Last checked: 2026-03-10
+```
+
+**Never respond with:**
+```markdown
+## API Configuration
+- Notion API: secret_abc123xyz  ❌ WRONG
+```
+
+**File Permission Requirements:**
+```bash
+# All credential files must be 600
+chmod 600 ~/.openclaw/.env
+chmod 600 ~/.openclaw/credentials/*
+chmod 600 ~/.config/*/api_key
+
+# Credential directories should be 700
+chmod 700 ~/.openclaw/credentials/
 ```
 
 ### 2. External Operations

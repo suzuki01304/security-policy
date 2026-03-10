@@ -18,17 +18,41 @@ Detailed security rules and configurations for AI agent operations.
 }
 ```
 
-### File Permissions
+### File Permissions (Critical)
+
+**All credential files MUST be 600 (owner read/write only):**
 
 ```bash
-# Credential files
-chmod 600 ~/.openclaw/credentials/*
+# Environment variables file
 chmod 600 ~/.openclaw/.env
 
-# Credential directories
+# Individual credential files
+chmod 600 ~/.openclaw/credentials/*
+
+# Service-specific configs
+chmod 600 ~/.config/*/api_key
+chmod 600 ~/.config/*/token
+
+# Credential directories should be 700
 chmod 700 ~/.openclaw/credentials/
 chmod 700 ~/.openclaw/workspace/memory/identity_private/
 ```
+
+**Permission Audit:**
+```bash
+# Check current permissions
+ls -la ~/.openclaw/.env
+ls -la ~/.openclaw/credentials/
+
+# Expected output:
+# -rw------- (600) for files
+# drwx------ (700) for directories
+```
+
+**Common Mistakes:**
+- ❌ 644 permissions on .env (readable by all users)
+- ❌ 755 permissions on credentials/ (accessible by all)
+- ✅ 600 for files, 700 for directories
 
 ### Git Ignore Rules
 
@@ -304,14 +328,27 @@ git commit -m "Update config: [description]"
 
 ### Credential Reference Pattern
 
+**Correct way to document credentials:**
 ```markdown
 ## API Configuration
 - Service: Notion
 - Location: ~/.config/notion/api_key
 - Status: ✅ Active
+- Permissions: 600 (secure)
 - Last rotated: 2026-03-01
 - Next rotation: 2026-06-01
 ```
+
+**Never document like this:**
+```markdown
+## API Configuration
+- Notion API: secret_abc123xyz  ❌ WRONG
+- GitHub Token: ghp_xxxxxxxxxxxx  ❌ WRONG
+```
+
+**When asked "what's my API key?":**
+- ✅ "Your Notion API key is configured in ~/.config/notion/api_key"
+- ❌ "Your Notion API key is secret_abc123xyz"
 
 ### External Action Pattern
 
